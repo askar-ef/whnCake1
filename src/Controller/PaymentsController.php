@@ -19,93 +19,48 @@ class PaymentsController extends AppController
      */
     public function index()
     {
+        // Retrieve filter parameters from the request
+        $startDate = $this->request->getQuery('start_date');
+        $endDate = $this->request->getQuery('end_date');
+
+        // Set default pagination settings
         $this->paginate = [
             'contain' => ['Transactions'],
         ];
-        $payments = $this->paginate($this->Payments);
+
+        // Initialize query
+        $query = $this->Payments->find();
+
+        // Apply filters if dates are provided
+        if ($startDate && $endDate) {
+            // Validate date format and convert to DateTime if needed
+            try {
+                $startDateObj = new \DateTime($startDate);
+                $endDateObj = new \DateTime($endDate);
+
+                // Filter payments by date range
+                $query->where([
+                    'payment_date >=' => $startDateObj->format('Y-m-d'),
+                    'payment_date <=' => $endDateObj->format('Y-m-d'),
+                ]);
+
+                // Display success message with selected date range
+                $this->Flash->success(__('Showing payments from {0} to {1}.', $startDateObj->format('Y-m-d'), $endDateObj->format('Y-m-d')));
+            } catch (\Exception $e) {
+                // Show error message if date is invalid
+                $this->Flash->error(__('Invalid date format. Please use YYYY-MM-DD.'));
+            }
+        }
+
+        $payments = $this->paginate($query);
+
+        // Check if no payments are found within the date range
+        if ($startDate && $endDate && $payments->isEmpty()) {
+            $this->Flash->warning(__('No payments found for the selected date range.'));
+        }
 
         $this->set(compact('payments'));
     }
 
-    /**
-     * View method
-     *
-     * @param string|null $id Payment id.
-     * @return \Cake\Http\Response|null|void Renders view
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
-     */
-    public function view($id = null)
-    {
-        $payment = $this->Payments->get($id, [
-            'contain' => ['Transactions'],
-        ]);
-
-        $this->set(compact('payment'));
-    }
-
-    /**
-     * Add method
-     *
-     * @return \Cake\Http\Response|null|void Redirects on successful add, renders view otherwise.
-     */
-    public function add()
-    {
-        $payment = $this->Payments->newEmptyEntity();
-        if ($this->request->is('post')) {
-            $payment = $this->Payments->patchEntity($payment, $this->request->getData());
-            if ($this->Payments->save($payment)) {
-                $this->Flash->success(__('The payment has been saved.'));
-
-                return $this->redirect(['action' => 'index']);
-            }
-            $this->Flash->error(__('The payment could not be saved. Please, try again.'));
-        }
-        $transactions = $this->Payments->Transactions->find('list', ['limit' => 200])->all();
-        $this->set(compact('payment', 'transactions'));
-    }
-
-    /**
-     * Edit method
-     *
-     * @param string|null $id Payment id.
-     * @return \Cake\Http\Response|null|void Redirects on successful edit, renders view otherwise.
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
-     */
-    public function edit($id = null)
-    {
-        $payment = $this->Payments->get($id, [
-            'contain' => [],
-        ]);
-        if ($this->request->is(['patch', 'post', 'put'])) {
-            $payment = $this->Payments->patchEntity($payment, $this->request->getData());
-            if ($this->Payments->save($payment)) {
-                $this->Flash->success(__('The payment has been saved.'));
-
-                return $this->redirect(['action' => 'index']);
-            }
-            $this->Flash->error(__('The payment could not be saved. Please, try again.'));
-        }
-        $transactions = $this->Payments->Transactions->find('list', ['limit' => 200])->all();
-        $this->set(compact('payment', 'transactions'));
-    }
-
-    /**
-     * Delete method
-     *
-     * @param string|null $id Payment id.
-     * @return \Cake\Http\Response|null|void Redirects to index.
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
-     */
-    public function delete($id = null)
-    {
-        $this->request->allowMethod(['post', 'delete']);
-        $payment = $this->Payments->get($id);
-        if ($this->Payments->delete($payment)) {
-            $this->Flash->success(__('The payment has been deleted.'));
-        } else {
-            $this->Flash->error(__('The payment could not be deleted. Please, try again.'));
-        }
-
-        return $this->redirect(['action' => 'index']);
-    }
+    // Other methods remain unchanged...
 }

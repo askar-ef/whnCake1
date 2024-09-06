@@ -1,9 +1,3 @@
-<?php
-/**
- * @var \App\View\AppView $this
- * @var iterable<\App\Model\Entity\Payment> $payments
- */
-?>
 <div class="payments index content">
     <?= $this->Html->link(__('New Payment'), ['action' => 'add'], ['class' => 'button float-right']) ?>
     <h3><?= __('Payments') ?></h3>
@@ -17,6 +11,9 @@
             <?= $this->Form->button('Submit') ?>
         <?= $this->Form->end() ?>
     </div>
+
+    <!-- Flash messages -->
+    <?= $this->Flash->render() ?>
 
     <div class="table-responsive">
         <table>

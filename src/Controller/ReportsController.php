@@ -13,11 +13,6 @@ use Cake\I18n\FrozenTime;
  */
 class ReportsController extends AppController
 {
-    /**
-     * Index method
-     *
-     * @return \Cake\Http\Response|null|void Renders view
-     */
     public function initialize(): void
     {
         parent::initialize();
@@ -26,17 +21,18 @@ class ReportsController extends AppController
         $this->loadModel('Customers');
         $this->loadModel('Motorcycles');
     }
+
     public function index()
     {
-        // Filter tanggal untuk transaksi
+        // Retrieve filter parameters from the request
         $startDate = $this->request->getQuery('start_date');
         $endDate = $this->request->getQuery('end_date');
 
-        // Konversi string tanggal menjadi objek FrozenTime
+        // Convert string dates to FrozenTime objects
         $startDate = $startDate ? FrozenTime::parse($startDate) : FrozenTime::now()->subMonth();
         $endDate = $endDate ? FrozenTime::parse($endDate) : FrozenTime::now();
 
-        // Query data transaksi dengan relasi ke customers dan motorcycles
+        // Query transactions with related models
         $transactions = $this->Transactions->find()
             ->contain(['Customers', 'Motorcycles'])
             ->where([
@@ -45,17 +41,18 @@ class ReportsController extends AppController
             ])
             ->all();
 
-        // Kirim data ke view
+        // Set flash message if no transactions are found
+        if ($startDate && $endDate && $transactions->isEmpty()) {
+            $this->Flash->warning(__('No transactions found for the selected date range.'));
+        } else {
+            // Display success message with selected date range
+            $this->Flash->success(__('Showing transactions from {0} to {1}.', $startDate->format('Y-m-d'), $endDate->format('Y-m-d')));
+        }
+
+        // Pass data to the view
         $this->set(compact('transactions', 'startDate', 'endDate'));
     }
 
-    /**
-     * View method
-     *
-     * @param string|null $id Report id.
-     * @return \Cake\Http\Response|null|void Renders view
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
-     */
     public function view($id = null)
     {
         $report = $this->Reports->get($id, [
@@ -65,11 +62,6 @@ class ReportsController extends AppController
         $this->set(compact('report'));
     }
 
-    /**
-     * Add method
-     *
-     * @return \Cake\Http\Response|null|void Redirects on successful add, renders view otherwise.
-     */
     public function add()
     {
         $report = $this->Reports->newEmptyEntity();
@@ -85,13 +77,6 @@ class ReportsController extends AppController
         $this->set(compact('report'));
     }
 
-    /**
-     * Edit method
-     *
-     * @param string|null $id Report id.
-     * @return \Cake\Http\Response|null|void Redirects on successful edit, renders view otherwise.
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
-     */
     public function edit($id = null)
     {
         $report = $this->Reports->get($id, [
@@ -109,13 +94,6 @@ class ReportsController extends AppController
         $this->set(compact('report'));
     }
 
-    /**
-     * Delete method
-     *
-     * @param string|null $id Report id.
-     * @return \Cake\Http\Response|null|void Redirects to index.
-     * @throws \Cake\Datasource\Exception\RecordNotFoundException When record not found.
-     */
     public function delete($id = null)
     {
         $this->request->allowMethod(['post', 'delete']);

@@ -1,44 +1,52 @@
 <?php
+
 /**
  * @var \App\View\AppView $this
- * @var iterable<\App\Model\Entity\Purchase> $purchases
  */
 ?>
 <div class="reports index content">
-    <h3><?= __('Laporan Pembelian') ?></h3>
+    <h3><?= __('Purchase Report') ?></h3>
 
     <!-- Filter Form -->
-    <?= $this->Form->create(null, ['type' => 'get']) ?>
-        <?= $this->Form->control('start_date', ['type' => 'date', 'label' => 'Tanggal Mulai']) ?>
-        <?= $this->Form->control('end_date', ['type' => 'date', 'label' => 'Tanggal Akhir']) ?>
+    <div class="filter">
+        <h4><?= __('Filter Reports by Date') ?></h4>
+        <?= $this->Form->create(null, ['type' => 'get']) ?>
+        <?= $this->Form->control('start_date', ['type' => 'date', 'label' => 'Start Date']) ?>
+        <?= $this->Form->control('end_date', ['type' => 'date', 'label' => 'End Date']) ?>
         <?= $this->Form->button('Filter') ?>
-    <?= $this->Form->end() ?>
+        <?= $this->Form->end() ?>
+    </div>
 
-    <!-- Tampilkan rentang waktu jika ada filter -->
-    <?php if (!empty($startDate) && !empty($endDate)): ?>
-        <p>Menampilkan data dari <?= h($startDate) ?> hingga <?= h($endDate) ?></p>
-    <?php endif; ?>
+    <!-- Flash messages -->
+    <?= $this->Flash->render() ?>
 
-    <!-- Data Transaksi -->
-    <table>
-        <thead>
-            <tr>
-                <th><?= __('Nama Customer') ?></th>
-                <th><?= __('Motor') ?></th>
-                <th><?= __('Jumlah') ?></th>
-                <th><?= __('Tanggal Transaksi') ?></th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($transactions as $transaction): ?>
+    <div class="table-responsive">
+        <table>
+            <thead>
                 <tr>
-                    <td><?= h($transaction->customer->name) ?></td>
-                    <td><?= h($transaction->motorcycle->model) ?></td>
-                    <td><?= h($transaction->amount) ?></td>
-                    <td><?= h($transaction->transaction_date->format('Y-m-d')) ?></td>
+                    <th><?= __('No') ?></th>
+                    <th><?= __('Customer Name') ?></th>
+                    <th><?= __('Model') ?></th>
+                    <th><?= __('Amount') ?></th>
+                    <th><?= __('Date') ?></th>
                 </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-</div>
+            </thead>
+            <tbody>
+                <?php
+                $counter = 1;
+                foreach ($transactions as $transaction): ?>
+                    <tr>
+                        <td><?= h($counter) ?></td>
+                        <td><?= h($transaction->customer->name) ?></td>
+                        <td><?= h($transaction->motorcycle->model) ?></td>
+                        <td><?= h($transaction->amount) ?></td>
+                        <td><?= h($transaction->transaction_date->format('Y-m-d')) ?></td>
+                    </tr>
+                    <?php $counter++;
+                    ?>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
 
+</div>

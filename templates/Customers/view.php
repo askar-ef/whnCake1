@@ -1,7 +1,8 @@
 <?php
+
 /**
  * @var \App\View\AppView $this
- * @var \App\Model\Entity\Customer $customer
+ * @var iterable<\App\Model\Entity\Customer> $customers
  */
 ?>
 <div class="row">
@@ -44,32 +45,32 @@
             <div class="related">
                 <h4><?= __('Related Transactions') ?></h4>
                 <?php if (!empty($customer->transactions)) : ?>
-                <div class="table-responsive">
-                    <table>
-                        <tr>
-                            <th><?= __('Id') ?></th>
-                            <th><?= __('Customer Id') ?></th>
-                            <th><?= __('Motorcycle Id') ?></th>
-                            <th><?= __('Transaction Date') ?></th>
-                            <th><?= __('Amount') ?></th>
-                            <th class="actions"><?= __('Actions') ?></th>
-                        </tr>
-                        <?php foreach ($customer->transactions as $transactions) : ?>
-                        <tr>
-                            <td><?= h($transactions->id) ?></td>
-                            <td><?= h($transactions->customer_id) ?></td>
-                            <td><?= h($transactions->motorcycle_id) ?></td>
-                            <td><?= h($transactions->transaction_date) ?></td>
-                            <td><?= h($transactions->amount) ?></td>
-                            <td class="actions">
-                                <?= $this->Html->link(__('View'), ['controller' => 'Transactions', 'action' => 'view', $transactions->id]) ?>
-                                <?= $this->Html->link(__('Edit'), ['controller' => 'Transactions', 'action' => 'edit', $transactions->id]) ?>
-                                <?= $this->Form->postLink(__('Delete'), ['controller' => 'Transactions', 'action' => 'delete', $transactions->id], ['confirm' => __('Are you sure you want to delete # {0}?', $transactions->id)]) ?>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </table>
-                </div>
+                    <div class="table-responsive">
+                        <table>
+                            <tr>
+                                <th><?= __('Id') ?></th>
+                                <th><?= __('Customer Id') ?></th>
+                                <th><?= __('Motorcycle Id') ?></th>
+                                <th><?= __('Transaction Date') ?></th>
+                                <th><?= __('Amount') ?></th>
+                                <th class="actions"><?= __('Actions') ?></th>
+                            </tr>
+                            <?php foreach ($customer->transactions as $transactions) : ?>
+                                <tr>
+                                    <td><?= h($transactions->id) ?></td>
+                                    <td><?= h($transactions->customer_id) ?></td>
+                                    <td><?= h($transactions->motorcycle_id) ?></td>
+                                    <td><?= h($transactions->transaction_date) ?></td>
+                                    <td><?= h($transactions->amount) ?></td>
+                                    <td class="actions">
+                                        <?= $this->Html->link(__('View'), ['controller' => 'Transactions', 'action' => 'view', $transactions->id]) ?>
+                                        <?= $this->Html->link(__('Edit'), ['controller' => 'Transactions', 'action' => 'edit', $transactions->id]) ?>
+                                        <?= $this->Form->postLink(__('Delete'), ['controller' => 'Transactions', 'action' => 'delete', $transactions->id], ['confirm' => __('Are you sure you want to delete # {0}?', $transactions->id)]) ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </table>
+                    </div>
                 <?php endif; ?>
             </div>
         </div>

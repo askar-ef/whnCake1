@@ -61,6 +61,4 @@ class PaymentsController extends AppController
 
         $this->set(compact('payments'));
     }
-
-    // Other methods remain unchanged...
 }

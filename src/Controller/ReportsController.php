@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use Cake\I18n\FrozenTime;
-
 /**
  * Reports Controller
  *
+ * @property \App\Model\Table\TransactionsTable $Transactions
+ * @property \App\Model\Table\CustomersTable $Customers
+ * @property \App\Model\Table\MotorcyclesTable $Motorcycles
  * @method \App\Model\Entity\Report[]|\Cake\Datasource\ResultSetInterface paginate($object = null, array $settings = [])
  */
 class ReportsController extends AppController
@@ -17,9 +18,9 @@ class ReportsController extends AppController
     {
         parent::initialize();
         // Load the required models
-        $this->loadModel('Transactions');
-        $this->loadModel('Customers');
-        $this->loadModel('Motorcycles');
+        $this->Transactions = $this->fetchTable('Transactions');
+        $this->Customers = $this->fetchTable('Customers');
+        $this->Motorcycles = $this->fetchTable('Motorcycles');
     }
 
     public function index()
@@ -28,25 +29,46 @@ class ReportsController extends AppController
         $startDate = $this->request->getQuery('start_date');
         $endDate = $this->request->getQuery('end_date');
 
-        // Convert string dates to FrozenTime objects
-        $startDate = $startDate ? FrozenTime::parse($startDate) : FrozenTime::now()->subMonth();
-        $endDate = $endDate ? FrozenTime::parse($endDate) : FrozenTime::now();
+        // Initialize query
+        $query = $this->Transactions->find()
+            ->contain(['Customers', 'Motorcycles']);
 
-        // Query transactions with related models
-        $transactions = $this->Transactions->find()
-            ->contain(['Customers', 'Motorcycles'])
-            ->where([
-                'Transactions.transaction_date >=' => $startDate,
-                'Transactions.transaction_date <=' => $endDate,
-            ])
-            ->all();
+        // Apply filters if dates are provided
+        if ($startDate && $endDate) {
+            try {
+                $startDateObj = new \DateTime($startDate);
+                $endDateObj = new \DateTime($endDate);
 
-        // Set flash message if no transactions are found
-        if ($startDate && $endDate && $transactions->isEmpty()) {
-            $this->Flash->warning(__('No transactions found for the selected date range.'));
+                // Check if end date is before start date
+                if ($endDateObj < $startDateObj) {
+                    $this->Flash->error(__('End date cannot be earlier than start date.'));
+                    // Set empty transactions to display
+                    $transactions = [];
+                } else {
+                    // Filter transactions by date range
+                    $query->where([
+                        'Transactions.transaction_date >=' => $startDateObj->format('Y-m-d'),
+                        'Transactions.transaction_date <=' => $endDateObj->format('Y-m-d'),
+                    ]);
+
+                    $transactions = $this->paginate($query);
+
+                    // Check if no transactions are found within the date range
+                    if ($transactions->isEmpty()) {
+                        $this->Flash->success(__('Showing transactions from {0} to {1}.', $startDateObj->format('Y-m-d'), $endDateObj->format('Y-m-d')));
+                        $this->Flash->warning(__('No transactions found for the selected date range.'));
+                    } else {
+                        // Display success message with selected date range
+                        $this->Flash->success(__('Showing transactions from {0} to {1}.', $startDateObj->format('Y-m-d'), $endDateObj->format('Y-m-d')));
+                    }
+                }
+            } catch (\Exception $e) {
+                // Show error message if date is invalid
+                $this->Flash->error(__('Invalid date format. Please use YYYY-MM-DD.'));
+                $transactions = [];
+            }
         } else {
-            // Display success message with selected date range
-            $this->Flash->success(__('Showing transactions from {0} to {1}.', $startDate->format('Y-m-d'), $endDate->format('Y-m-d')));
+            $transactions = $this->paginate($query);
         }
 
         // Pass data to the view
@@ -60,50 +82,5 @@ class ReportsController extends AppController
         ]);
 
         $this->set(compact('report'));
-    }
-
-    public function add()
-    {
-        $report = $this->Reports->newEmptyEntity();
-        if ($this->request->is('post')) {
-            $report = $this->Reports->patchEntity($report, $this->request->getData());
-            if ($this->Reports->save($report)) {
-                $this->Flash->success(__('The report has been saved.'));
-
-                return $this->redirect(['action' => 'index']);
-            }
-            $this->Flash->error(__('The report could not be saved. Please, try again.'));
-        }
-        $this->set(compact('report'));
-    }
-
-    public function edit($id = null)
-    {
-        $report = $this->Reports->get($id, [
-            'contain' => [],
-        ]);
-        if ($this->request->is(['patch', 'post', 'put'])) {
-            $report = $this->Reports->patchEntity($report, $this->request->getData());
-            if ($this->Reports->save($report)) {
-                $this->Flash->success(__('The report has been saved.'));
-
-                return $this->redirect(['action' => 'index']);
-            }
-            $this->Flash->error(__('The report could not be saved. Please, try again.'));
-        }
-        $this->set(compact('report'));
-    }
-
-    public function delete($id = null)
-    {
-        $this->request->allowMethod(['post', 'delete']);
-        $report = $this->Reports->get($id);
-        if ($this->Reports->delete($report)) {
-            $this->Flash->success(__('The report has been deleted.'));
-        } else {
-            $this->Flash->error(__('The report could not be deleted. Please, try again.'));
-        }
-
-        return $this->redirect(['action' => 'index']);
     }
 }

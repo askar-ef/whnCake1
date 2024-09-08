@@ -1,14 +1,21 @@
+<?php
+
+/**
+ * @var \App\View\AppView $this
+ * @var iterable<\App\Model\Entity\Payment> $payments
+ */
+?>
 <div class="payments index content">
     <?= $this->Html->link(__('New Payment'), ['action' => 'add'], ['class' => 'button float-right']) ?>
     <h3><?= __('Payments') ?></h3>
 
-    <!-- Filter Form for Payment Date Range -->
+    <!-- Filter Form -->
     <div class="filter">
         <h4><?= __('Filter Payments by Date') ?></h4>
         <?= $this->Form->create(null, ['type' => 'get']) ?>
-            <?= $this->Form->control('start_date', ['type' => 'date', 'label' => 'Start Date']) ?>
-            <?= $this->Form->control('end_date', ['type' => 'date', 'label' => 'End Date']) ?>
-            <?= $this->Form->button('Submit') ?>
+        <?= $this->Form->control('start_date', ['type' => 'date', 'label' => 'Start Date']) ?>
+        <?= $this->Form->control('end_date', ['type' => 'date', 'label' => 'End Date']) ?>
+        <?= $this->Form->button('Filter') ?>
         <?= $this->Form->end() ?>
     </div>
 
@@ -29,20 +36,20 @@
             </thead>
             <tbody>
                 <?php foreach ($payments as $payment): ?>
-                <tr>
-                    <td><?= $this->Number->format($payment->id) ?></td>
-                    <td>
-                        <?= $payment->has('transaction') ? $this->Html->link($payment->transaction->id, ['controller' => 'Transactions', 'action' => 'view', $payment->transaction->id]) : '' ?>
-                    </td>
-                    <td><?= h($payment->payment_date->format('Y-m-d')) ?></td>
-                    <td><?= $this->Number->format($payment->amount_paid) ?></td>
-                    <td><?= h($payment->payment_method) ?></td>
-                    <td class="actions">
-                        <?= $this->Html->link(__('View'), ['action' => 'view', $payment->id]) ?>
-                        <?= $this->Html->link(__('Edit'), ['action' => 'edit', $payment->id]) ?>
-                        <?= $this->Form->postLink(__('Delete'), ['action' => 'delete', $payment->id], ['confirm' => __('Are you sure you want to delete # {0}?', $payment->id)]) ?>
-                    </td>
-                </tr>
+                    <tr>
+                        <td><?= $this->Number->format($payment->id) ?></td>
+                        <td>
+                            <?= $payment->has('transaction') ? $this->Html->link($payment->transaction->id, ['controller' => 'Transactions', 'action' => 'view', $payment->transaction->id]) : '' ?>
+                        </td>
+                        <td><?= h($payment->payment_date->format('Y-m-d')) ?></td>
+                        <td><?= $this->Number->format($payment->amount_paid) ?></td>
+                        <td><?= h($payment->payment_method) ?></td>
+                        <td class="actions">
+                            <?= $this->Html->link(__('View'), ['action' => 'view', $payment->id]) ?>
+                            <?= $this->Html->link(__('Edit'), ['action' => 'edit', $payment->id]) ?>
+                            <?= $this->Form->postLink(__('Delete'), ['action' => 'delete', $payment->id], ['confirm' => __('Are you sure you want to delete # {0}?', $payment->id)]) ?>
+                        </td>
+                    </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>

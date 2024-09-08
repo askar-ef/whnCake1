@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @var \App\View\AppView $this
  * @var iterable<\App\Model\Entity\Customer> $customers
@@ -20,17 +21,17 @@
             </thead>
             <tbody>
                 <?php foreach ($customers as $customer): ?>
-                <tr>
-                    <td><?= $this->Number->format($customer->id) ?></td>
-                    <td><?= h($customer->name) ?></td>
-                    <td><?= h($customer->email) ?></td>
-                    <td><?= h($customer->phone) ?></td>
-                    <td class="actions">
-                        <?= $this->Html->link(__('View'), ['action' => 'view', $customer->id]) ?>
-                        <?= $this->Html->link(__('Edit'), ['action' => 'edit', $customer->id]) ?>
-                        <?= $this->Form->postLink(__('Delete'), ['action' => 'delete', $customer->id], ['confirm' => __('Are you sure you want to delete # {0}?', $customer->id)]) ?>
-                    </td>
-                </tr>
+                    <tr>
+                        <td><?= $this->Number->format($customer->id) ?></td>
+                        <td><?= h($customer->name) ?></td>
+                        <td><?= h($customer->email) ?></td>
+                        <td><?= h($customer->phone) ?></td>
+                        <td class="actions">
+                            <?= $this->Html->link(__('View'), ['action' => 'view', $customer->id]) ?>
+                            <?= $this->Html->link(__('Edit'), ['action' => 'edit', $customer->id]) ?>
+                            <?= $this->Form->postLink(__('Delete'), ['action' => 'delete', $customer->id], ['confirm' => __('Are you sure you want to delete # {0}?', $customer->id)]) ?>
+                        </td>
+                    </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
